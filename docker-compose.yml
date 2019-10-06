@@ -1,0 +1,69 @@
+version: "3"
+services:
+  odoo:
+    image: odoo:12.0
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - internal
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    environment:
+      - HOST=db
+      - USER=${ODOO_USER}
+      - PASSWORD=${ODOO_PASS}
+    volumes:
+      - ./odoo/odoo-web-data:/var/lib/odoo
+      - ./odoo/config:/etc/odoo
+      - ./odoo/addons:/mnt/extra-addons
+      - ./odoo/logs:/var/log/odoo
+    labels:
+      - 'traefik.http.routers.odoo.rule=Host(`${ODOO_TRAEFIK_URL}`)'
+      - 'traefik.http.routers.odoo.entrypoints=websecure'
+      - 'traefik.http.routers.odoo.tls.certresolver=odoo'
+      - 'traefik.port=3000'
+  db:
+    image: postgres:10
+    restart: unless-stopped
+    networks:
+      - internal
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${ODOO_USER}
+      - POSTGRES_PASSWORD=${ODOO_PASS}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+  traefik:
+    image: traefik:v2.0
+    networks:
+      - internal
+      - web
+    ports:
+      # The HTTP port
+      - "80:80"
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      - "./traefik/letsencrypt:/letsencrypt"
+      - "./traefik/traefik.yml:/etc/traefik.yml"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    command:
+     - "--log.level=DEBUG"
+     - "--api.insecure=true"
+     - "--providers.docker"
+     - "--providers.docker.defaultRule=Host(`{{ trimPrefix `/` .Name }}.${TRAEFIK_DEFAULT_DOMAIN}`)"
+     - "--entryPoints.web.address=:80"
+     - "--entryPoints.websecure.address=:443"
+     - "--certificatesResolvers.odootest.acme.httpchallenge=true"
+     - "--certificatesresolvers.odootest.acme.httpchallenge.entrypoint=web"
+     - "--certificatesresolvers.odootest.acme.email=${ACME_EMAIL}"
+     - "--certificatesresolvers.odootest.acme.storage=/letsencrypt/acme.json"
+
+networks:
+  internal:
+    web:
+      external: true
