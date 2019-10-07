@@ -23,7 +23,11 @@ services:
       - 'traefik.http.routers.odoo.rule=Host(`${ODOO_TRAEFIK_URL}`)'
       - 'traefik.http.routers.odoo.entrypoints=websecure'
       - 'traefik.http.routers.odoo.tls.certresolver=odoo'
-      - 'traefik.port=3000'
+      - 'traefik.port=8069'
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
   db:
     image: postgres:10
     restart: unless-stopped
