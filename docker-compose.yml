@@ -69,5 +69,5 @@ services:
 
 networks:
   internal:
-    web:
+  web:
       external: true
