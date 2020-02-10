@@ -62,10 +62,10 @@ services:
      - "--providers.docker.defaultRule=Host(`{{ trimPrefix `/` .Name }}.${TRAEFIK_DEFAULT_DOMAIN}`)"
      - "--entryPoints.web.address=:80"
      - "--entryPoints.websecure.address=:443"
-     - "--certificatesResolvers.odootest.acme.httpchallenge=true"
-     - "--certificatesresolvers.odootest.acme.httpchallenge.entrypoint=web"
-     - "--certificatesresolvers.odootest.acme.email=${ACME_EMAIL}"
-     - "--certificatesresolvers.odootest.acme.storage=/letsencrypt/acme.json"
+     - "--certificatesResolvers.odoo.acme.httpchallenge=true"
+     - "--certificatesresolvers.odoo.acme.httpchallenge.entrypoint=web"
+     - "--certificatesresolvers.odoo.acme.email=${ACME_EMAIL}"
+     - "--certificatesresolvers.odoo.acme.storage=/letsencrypt/acme.json"
 
 networks:
   internal:
