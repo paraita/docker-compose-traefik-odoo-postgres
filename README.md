@@ -40,6 +40,12 @@ Host(`{{ trimPrefix `/` .Name }}.${TRAEFIK_DEFAULT_DOMAIN}`)
 
 Traefik will automatically renew the certificate every 3 months.
 
+**WARNING** You'll need to create an external network object using the docker CLI, before starting the containers:
+
+```
+docker create network web
+```
+
 ## Run
 
 ```bash
